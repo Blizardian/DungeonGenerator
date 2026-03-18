@@ -163,9 +163,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 542f85f845ff8b64d83c2af01d991193, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LineGenerator
-  minRoomWidth: 5
-  minRoomHeight: 5
-  splitHorizontally: 1
+  minRoomWidth: 10
+  minRoomHeight: 10
+  DungeonMap:
+    x: 0
+    y: 0
+    width: 100
+    height: 100
+  manualMode: 0
+  roomGenerationComplete: 0
 --- !u!1 &1196462261
 GameObject:
   m_ObjectHideFlags: 0
