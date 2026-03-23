@@ -1,19 +1,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LineGenerator : MonoBehaviour
+public class Backup : MonoBehaviour
 {
     List<RectInt> rooms = new List<RectInt>(); // Keep track of the rooms
     List<RectInt> finalRooms = new List<RectInt>(); // Keep track of the rooms that are completed
+    List<RectInt> roomDoors = new List<RectInt>(); // Keep track of the doors
 
     [SerializeField] int minRoomWidth = 10; // The minimum width of a room
     [SerializeField] int minRoomHeight = 10; // the minimum height of a room
 
+    [SerializeField] int minDoorWidth = 1; // The minimum widht of a door
+    [SerializeField] int minDoorHeight = 1; // The minimum height of a door
+
     [SerializeField] RectInt DungeonMap = new RectInt(0, 0, 100, 100); // A room that resambles the dungeon map
+    [SerializeField] RectInt Door = new RectInt(50, 50, 1, 1);
 
     public bool manualMode = true; // Enable manual mode or not
 
     public bool roomGenerationComplete = false; // Keeps track if the room generation is completed
+
+    int wallSize = 1; // The size of the wall
 
     void Start()
     {
@@ -24,10 +31,11 @@ public class LineGenerator : MonoBehaviour
     void Update()
     {
         DebugDrawRooms();
+        DebugDrawDoors();
 
         AlgorithmsUtils.DebugRectInt(DungeonMap, Color.white, 0); // Makes the dungeon map white (The boundries)
 
-        if (roomGenerationComplete)
+        if (roomGenerationComplete) // Stop if the room reneration is completed
         {
             return;
         }
@@ -44,7 +52,7 @@ public class LineGenerator : MonoBehaviour
             SplitRoom(); // Run the SplitRoom method
         }
 
-        if(rooms.Count == 0) // if there are no rooms left to split
+        if (rooms.Count == 0) // if there are no rooms left to split
         {
             roomGenerationComplete = true; // Generation is completed, mark the boolean as true
             Debug.Log("Roomgeneration completed!");
@@ -61,16 +69,22 @@ public class LineGenerator : MonoBehaviour
         foreach (RectInt room in finalRooms) // For each room in finalRooms
         {
             AlgorithmsUtils.DebugRectInt(room, Color.red, 0); // Draw the room red
-            Debug.Log("Room in rooms: width = " + room.width + ", height = " + room.height); // Log the width and height to the console
+            Debug.Log("Final room stats are: width = " + room.width + ", height = " + room.height); // Log the width and height to the console
+        }
+    }
+
+    private void DebugDrawDoors()
+    {
+        foreach (RectInt door in roomDoors)
+        {
+            AlgorithmsUtils.DebugRectInt(door, Color.cyan, 0); // Makes the dungeon map white (The boundries)
         }
     }
 
     private void SplitRoom()
     {
-        int wallSize = 1; // The size of the wall
-
         int roomIndex = -1; // Mark the index of a room that can be split, if it is -1 than there are no suitable rooms to split
-        
+
         for (int i = 0; i < rooms.Count; i++) // See if there is a room that can be split
         {
             RectInt splittableRoom = rooms[i]; // local RectInt splittableRoom is now used for calling the room that the index is at
@@ -85,7 +99,7 @@ public class LineGenerator : MonoBehaviour
             }
         }
 
-        if(roomIndex == -1) // if there are no rooms left to split, move them to finalRooms
+        if (roomIndex == -1) // if there are no rooms left to split, move them to finalRooms
         {
             finalRooms.AddRange(rooms); // Add the rooms that can't be split to the finalRooms
             rooms.Clear(); // Clear rooms, making it empty
@@ -101,7 +115,7 @@ public class LineGenerator : MonoBehaviour
 
 
         bool splitHorizontally;
-        
+
         if (canSplitHorizontally && canSplitVertically) // If the room can be split both ways, randomly choose horizontally or vertically
         {
             splitHorizontally = Random.value < 0.5f;
@@ -117,7 +131,7 @@ public class LineGenerator : MonoBehaviour
             // Calculate the min and max Y positions to split the room horizontally
             int minY = room.y + minRoomHeight;
             int maxY = room.yMax - minRoomHeight - wallSize + 1;
-                        
+
             if (minY >= maxY)// If there’s no room to split
             {
                 finalRooms.Add(room); // Move the room to the finalRooms
@@ -133,6 +147,17 @@ public class LineGenerator : MonoBehaviour
             // Add the new rooms to the list
             rooms.Add(bottom);
             rooms.Add(top);
+
+            int wallStartX = room.xMin;
+            int wallEndX = room.xMax;
+            int wallLenght = wallEndX - wallStartX;
+
+            int doorX = wallStartX + (int)(wallLenght * 0.5f);
+
+            int doorY = splitY;
+
+            RectInt door = new RectInt(doorX, doorY, 1, 1);
+            roomDoors.Add(door);
         }
         else
         {
@@ -145,16 +170,28 @@ public class LineGenerator : MonoBehaviour
                 finalRooms.Add(room); // Move the room to the finalRooms
                 return;
             }
-                        
+
             int splitX = Random.Range(minX, maxX); // Pick a random X position to split
 
             // Create the two new rooms after the vertical split
             RectInt left = new RectInt(room.x, room.y, splitX - room.x, room.height);
             RectInt right = new RectInt(splitX + wallSize, room.y, room.xMax - (splitX + wallSize), room.height);
 
+
             // Add the new rooms to the list
             rooms.Add(left);
             rooms.Add(right);
+
+            int wallStartY = room.yMin;
+            int wallEndY = room.yMax;
+            int wallLength = wallEndY - wallStartY;
+
+            int doorY = wallStartY + (int)(wallLength * 0.5f);
+
+            int doorX = splitX;
+
+            RectInt door = new RectInt(doorX, doorY, 1, 1);
+            roomDoors.Add(door);
         }
         Debug.Log("splitHorizontally: " + splitHorizontally); // Log the direction to the console
     }

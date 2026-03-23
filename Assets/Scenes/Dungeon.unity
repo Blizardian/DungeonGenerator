@@ -170,7 +170,7 @@ MonoBehaviour:
     y: 0
     width: 100
     height: 100
-  manualMode: 0
+  manualMode: 1
   roomGenerationComplete: 0
 --- !u!1 &1196462261
 GameObject:
