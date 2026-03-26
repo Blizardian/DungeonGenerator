@@ -43,7 +43,7 @@ public class DungeonGenerator : MonoBehaviour
         {
             AlgorithmsUtils.DebugRectInt(room, Color.yellow, 0); // Draw the room yellow
         }
-        foreach (RectInt room in finalRooms) // For each room in rooms
+        foreach (RectInt room in finalRooms) // For each room in finalRooms
         {
             AlgorithmsUtils.DebugRectInt(room, Color.red, 0); // Draw the room red
         }
